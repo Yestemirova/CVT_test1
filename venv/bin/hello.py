@@ -96,7 +96,7 @@ def segment(original_image, mask_image, comparing_image):
             if bool_segment is False and comparing_crop[comparing_height / 2, w] == 0:
                 number_of_segments_in_cropped_image += 1
                 bool_segment = True
-
+    cv2.imwrite('Dataset/Segmented/' + name + 'S.jpg', lines)
     print(number_of_segments_in_cropped_image, number_of_segments_in_comparing_image)
 
     if np.abs(number_of_segments_in_cropped_image - number_of_segments_in_comparing_image) <= 1:
@@ -108,8 +108,7 @@ original_image = None
 mask_image = None
 comparing_image = None
 final_result = False
-out_path = "/Dataset/Segmented"
-filenames = [img for img in glob.glob("Dataset/Dirty LPs2/*.jpg")]
+filenames = [img for img in glob.glob("Dataset/Dirty/*.jpg")]
 filenames.sort()
 name = []
 number_of_images = 0
