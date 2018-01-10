@@ -6,7 +6,7 @@ import glob
 import string
 import fnmatch
 
-def segment(original_image, mask_image, comparing_image):
+def segment(original_image, mask_image, comparing_image, name):
     # Showing Original Images:
     # cv2.namedWindow('Original Image', cv2.WINDOW_NORMAL)
     # cv2.imshow('Original Image', original_image)
@@ -46,7 +46,7 @@ def segment(original_image, mask_image, comparing_image):
         # cv2.namedWindow('Rectangle', cv2.WINDOW_NORMAL)
         # cv2.imshow('Rectangle', rectangle)
 
-        # 4. Crop the rectangle from Original Image:
+        # 4. Crop the rectangle from Original and Comparing Image:
         crop = original_image[min_y:max_y, min_x:max_x]
         comparing_crop = comparing_image[min_y:max_y, min_x:max_x]
 
@@ -86,19 +86,17 @@ def segment(original_image, mask_image, comparing_image):
     # print(V_m, V_a, V_b)
 
     for w in range(width):
-        if height_value[w] < (0.86 * V_m):
+        if height_value[w] < (0.76 * V_m):
             bool_segment = False
         else:
             lines = cv2.line(crop, (w, 0), (w, height), (0, 0, 255), 1)
-            cv2.namedWindow('Separating Lines', cv2.WINDOW_NORMAL)
-            cv2.imshow('Separating Lines', lines)
-            # cv2.imwrite(os.path.join(out_path, 'S.jpg'), lines)
+            # cv2.namedWindow('Separating Lines', cv2.WINDOW_NORMAL)
+            # cv2.imshow('Separating Lines', lines)
             if bool_segment is False and comparing_crop[comparing_height / 2, w] == 0:
                 number_of_segments_in_cropped_image += 1
                 bool_segment = True
-
-    print(number_of_segments_in_cropped_image, number_of_segments_in_comparing_image)
-
+    cv2.imwrite('Dataset/Segmented/' + name + 'S.jpg', lines)
+    # print(number_of_segments_in_cropped_image, number_of_segments_in_comparing_image)
     if np.abs(number_of_segments_in_cropped_image - number_of_segments_in_comparing_image) <= 1:
         return True
     else:
@@ -108,8 +106,8 @@ original_image = None
 mask_image = None
 comparing_image = None
 final_result = False
-out_path = "/Dataset/Segmented"
-filenames = [img for img in glob.glob("Dataset/Dirty LPs2/*.jpg")]
+
+filenames = [img for img in glob.glob("Dataset/Dirty/*.jpg")]
 filenames.sort()
 name = []
 number_of_images = 0
@@ -138,11 +136,13 @@ for file in filenames:
                 mask_image = cv2.imread(file1, 0)
         # print(original_image, mask_image, comparing_image)
         if comparing_image is not None and mask_image is not None:
-            # print("If 3: ", name)
-            final_result = segment(original_image, mask_image, comparing_image)
+            final_result = segment(original_image, mask_image, comparing_image, name)
             if final_result is True:
                 # print("True:", final_result)
                 number_of_segment_true += 1
 
-print ("End=", number_of_images, number_of_segment_true)
+percentage = number_of_segment_true*100 / number_of_images
+print("Total images = ", number_of_images)
+print("Segment proven = ", number_of_segment_true)
+print("Percentage = ", percentage)
 cv2.waitKey(0)
